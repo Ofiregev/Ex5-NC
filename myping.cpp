@@ -105,7 +105,9 @@ int main ()
         fprintf (stderr, "To create a raw socket, the process needs to be run by Admin/root user.\n\n");
         return -1;
     }
+
     //delete all about iphdr
+
     struct timeval start, stop; // we will use this to measure the time it takes to do the ping
     gettimeofday(&start, NULL);
     // Send the packet using sendto() for sending datagrams.
@@ -118,17 +120,14 @@ int main ()
     printf("The packet was successfuly sent to %s\n", DESTINATION_IP);
 
 
-char rec_buff[IP_MAXPACKET] = {0};//Init with zeroes
-size_t buffer_size = sizeof(rec_buff); 
-printf("got here1");
-socklen_t len = sizeof(dest_in);
-int rec_bytes = recvfrom(sock, rec_buff, buffer_size, 0 ,(struct sockaddr *) &dest_in, &len);
-printf("got here");
-if (rec_bytes > 0)
-{
-    printf("Recieved from %s\n", SOURCE_IP);
-}
-
+    char rec_buff[IP_MAXPACKET] = {0};//Init with zeroes
+    size_t buffer_size = sizeof(rec_buff); 
+    socklen_t len = sizeof(dest_in);
+    int rec_bytes = recvfrom(sock, rec_buff, buffer_size, 0 ,(struct sockaddr *) &dest_in, &len);
+    if (rec_bytes > 0)
+    {
+        printf("Recieved from %s\n", SOURCE_IP);
+    }
 
 gettimeofday(&stop, NULL);
 //calculating the rtt
