@@ -83,10 +83,10 @@ void print_info(const uint8_t * pkt_buffer, uint16_t pkt_length){
         printf("   |-Type Of Service   : %d\n",(unsigned int)iph->tos);
         printf("   |-IP Total Length   : %d  Bytes(Size of Packet)\n",ntohs(iph->tot_len));
         printf("   |-Identification    : %d\n",ntohs(iph->id));
-        printf("   |-TTL      : %d\n",(unsigned int)iph->ttl);
-        printf("   |-Protocol : %d\n",(unsigned int)iph->protocol);
-        printf("   |-Checksum : %d\n",ntohs(iph->check));
-        printf("   |-Source IP        : %s\n",inet_ntoa(source.sin_addr));
-        printf("   |-Destination IP   : %s\n",inet_ntoa(dest.sin_addr));
+        printf("   |-TTL               : %d\n",(unsigned int)iph->ttl);
+        printf("   |-Protocol          : %d\n",(unsigned int)iph->protocol);
+        printf("   |-Checksum          : %d\n",ntohs(iph->check));
+        printf("   |-Source IP         : %s\n",inet_ntoa(source.sin_addr));
+        printf("   |-Destination IP    : %s\n",inet_ntoa(dest.sin_addr));
     }
 }
