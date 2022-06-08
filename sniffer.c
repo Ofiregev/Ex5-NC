@@ -16,47 +16,38 @@
 #include <errno.h>
 
 #define ICMP_HDRLEN 8 
+/// The size of the ICMPHDR
 /**
- * @brief : for making this sniffer we used this site for helping:
+ * @brief : for making this sniffer we used this site helping build this sniffer:
  *  https://www.binarytides.com/packet-sniffer-code-c-linux/
  */
 
 
 #define Max_packet 1600 // define the max length of a packet
-void print_info(const uint8_t * pkt_buffer, uint16_t pkt_length);
-int main(int argc, char* argv[])
+void print_info(const uint8_t * pkt_buffer, uint16_t pkt_length);  //use for print the info of the packet
+int main()
 {
-    
-    int error_code =0;
     ssize_t data_size; /// this is type that has -1 and all the positive numbers
-    uint8_t packet_buffer[Max_packet]; // will be our buffer to remember the buffer there.
-    struct in_addr in;
-    struct sockaddr saddr;
-    printf("Starting...\n");
-
-    if(argc!=2){
-        printf("usage %s [IFNAME]\n", argv[0]);
-        error_code =1;
-    }
-
-    const char* interface_name = argv[1];
-    int raw_socket = socket(AF_PACKET,SOCK_RAW,htons(ETH_P_ALL));
-                    ///socket |||||domain, type, protocol|||
-    if(raw_socket<0){
+    uint8_t packet_buffer[Max_packet]; // will be our buffer to remember the buffer there. 
+    struct sockaddr saddr; //  that struct save part of the information of packet.
+    printf("Starting...\n"); // start to sniff packet - if it will be ICMP type we will print it.
+    int raw_socket = socket(AF_PACKET,SOCK_RAW,htons(ETH_P_ALL)); /// open our socket. 
+                    ///socket |||||domain -->AF_PACKET  = L2 socket, type--> SOCK_RAW, protocol --> in our case we bind to all the protocol type|||
+    if(raw_socket<0){ //if the socket not success opening --> the return value is negative.
         perror("socket Error\n");
-        error_code =2;
     }
-    while(1){
-        socklen_t saddr_size = sizeof(saddr);
+    while(EOF){
+        /// run untill the program end (stream end)
+        socklen_t saddr_size = sizeof(saddr); // save the size of the sockaddr information
         data_size = recvfrom(raw_socket, packet_buffer, Max_packet,0,&saddr,&saddr_size);
-        if(data_size==-1){
-            error_code =3;
-        }
-        //here we have packet already
+        // save the size of the data we get for socket whren we get a packet.
+
+        //here we have packet already and we send it to a function that will check if this is a ICMP protocol and print it if it is.
         print_info(packet_buffer, data_size);
     }
-
-
+    printf("closing the socket\n");
+    /// end the bind for packet of the socket
+    close(raw_socket);
 }
 
 void print_info(const uint8_t * pkt_buffer, uint16_t pkt_length){
@@ -65,17 +56,23 @@ void print_info(const uint8_t * pkt_buffer, uint16_t pkt_length){
     }
     
     struct iphdr * iph =(struct iphdr*) (pkt_buffer+sizeof(struct ethhdr));
+    // its jump to the part in the inforamtion of the socket that belong to ip and ICMP.
     if(iph->protocol==IPPROTO_ICMP)
+    // protocol of ICMP is 1.
     {
         unsigned short iphdrlen;
 	    iphdrlen = iph->ihl*4;
-	    struct udphdr *udph = (struct udphdr*)(pkt_buffer + iphdrlen);
+        /// get the length of the ipv4 on the packet
+	    struct udphdr *udph = (struct udphdr*)(pkt_buffer + iphdrlen); 
+        /// point to the place of the beginig of the iphdr info 
         struct sockaddr_in source,dest;
         memset(&source,0,sizeof(source));
         source.sin_addr.s_addr = iph->saddr;
+        // copy the src info from the packet with casting to the sutable struct
 	
 	    memset(&dest, 0, sizeof(dest));
 	    dest.sin_addr.s_addr = iph->daddr;
+        // copy the dst info from the packet with casting to the sutable struct
 
         printf("IP Header\n");
         printf("   |-IP Version        : %d\n",(unsigned int)iph->version);
