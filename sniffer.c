@@ -16,47 +16,36 @@
 #include <errno.h>
 
 #define ICMP_HDRLEN 8 
+/// The size of the ICMPHDR
 /**
- * @brief : for making this sniffer we used this site for helping:
+ * @brief : for making this sniffer we used this site helping build this sniffer:
  *  https://www.binarytides.com/packet-sniffer-code-c-linux/
  */
 
 
 #define Max_packet 1600 // define the max length of a packet
-void print_info(const uint8_t * pkt_buffer, uint16_t pkt_length);
-int main(int argc, char* argv[])
+void print_info(const uint8_t * pkt_buffer, uint16_t pkt_length);  //use for print the info of the packet
+int main()
 {
-    
-    int error_code =0;
     ssize_t data_size; /// this is type that has -1 and all the positive numbers
-    uint8_t packet_buffer[Max_packet]; // will be our buffer to remember the buffer there.
-    struct in_addr in;
-    struct sockaddr saddr;
-    printf("Starting...\n");
-
-    if(argc!=2){
-        printf("usage %s [IFNAME]\n", argv[0]);
-        error_code =1;
-    }
-
-    const char* interface_name = argv[1];
-    int raw_socket = socket(AF_PACKET,SOCK_RAW,htons(ETH_P_ALL));
-                    ///socket |||||domain, type, protocol|||
+    uint8_t packet_buffer[Max_packet]; // will be our buffer to remember the buffer there. 
+    struct sockaddr saddr; //  that struct save part of the information of packet.
+    printf("Starting...\n"); // start to sniff packet - if it will be ICMP type we will print it.
+    int raw_socket = socket(AF_PACKET,SOCK_RAW,htons(ETH_P_ALL)); /// open our socket. 
+                    ///socket |||||domain -->AF_PACKET  = L2 socket, type--> SOCK_RAW, protocol --> in our case we bind to all the protocol type|||
     if(raw_socket<0){
         perror("socket Error\n");
-        error_code =2;
     }
-    while(1){
+    while(EOF){
         socklen_t saddr_size = sizeof(saddr);
         data_size = recvfrom(raw_socket, packet_buffer, Max_packet,0,&saddr,&saddr_size);
         if(data_size==-1){
-            error_code =3;
         }
         //here we have packet already
         print_info(packet_buffer, data_size);
     }
-
-
+    printf("closing the socket\n");
+    close(raw_socket);
 }
 
 void print_info(const uint8_t * pkt_buffer, uint16_t pkt_length){
